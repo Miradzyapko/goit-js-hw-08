@@ -1,18 +1,55 @@
 
-const form = document.querySelector("feedback-form");
-const output = document.querySelector("#output");
-const LOCALSTORAGE_KEY = "goit-example-message";
+import throttle from 'lodash.throttle';
+import { save, load, remove } from './storage.js';
+const LOCALSTORAGE_KEY = "feedback-form-state";
+const saveData = {};
 
-updateOutput();
-form.addEventListener("submit", saveMessage);
+const form = document.querySelector(".feedback-form");  
 
-function saveMessage(evt) {
+
+form.addEventListener("submit", onFormSubmit);
+const throttledOnFormInput = throttle(onInput, 500);
+form.addEventListener('input', throttledOnFormInput);
+
+function onInput(evt)  {
+const { name, value } = evt.target;
+   let saveData = load(LOCALSTORAGE_KEY);
+    saveData = saveData ? saveData : {};
+  saveData[name] = value;
+   save(LOCALSTORAGE_KEY, saveData);
+  
+  }
+ 
+
+
+
+
+function onFormSubmit(evt) {
   evt.preventDefault();
-  localStorage.setItem(LOCALSTORAGE_KEY, form.elements.message.value);
-  updateOutput();
-  form.reset();
+const { elements: { email, message }} = evt.target; 
+ evt.target.reset();
+remove(LOCALSTORAGE_KEY);
+ 
 }
 
-function updateOutput() {
-  output.textContent = localStorage.getItem(LOCALSTORAGE_KEY) || "";
-}
+  
+updateInput ();
+function updateInput() {
+const saveData = load(LOCALSTORAGE_KEY);
+if(!saveData){
+  return; }
+  
+    Object.entries(saveData).forEach(([name, value]) => {
+      form.elements[name].value = value;
+    })
+    
+ 
+  }
+
+
+
+ 
+ 
+
+
+
